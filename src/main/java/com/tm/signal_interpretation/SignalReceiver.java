@@ -118,7 +118,7 @@ public class SignalReceiver {
                 continue;
             }
             // Format: 5,1,2|s_j_1
-            outputLines.add(csv + "|" + motor.getId());
+            outputLines.add(STR."\{csv}|\{motor.getId()}");
         }
 
         return String.join("\n", outputLines);
