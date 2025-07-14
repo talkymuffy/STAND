@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
  *  <li>{@link com.tm.signal_interpretation_helper_systems.MotorTypes} -Contains The Servo Motor Types [Servo and Stepper Motor Types]</li>
  * </ul>
  * @author Saptansu Ghosh
- * @version 1.1
+ * @version 1.2
  */
 public class SignalReceiver {
     public static SerialPort PORT;
@@ -91,8 +91,7 @@ public class SignalReceiver {
      *   <li>Strip the trailing "|" and split on "|" to get individual sample tokens.</li>
      *   <li>Attempt to parse the last token as an integer; if that fails,
      *       return "&lt;allValues&gt; | NO_MOTORS".</li>
-     *   <li>Use a threshold of 500: values &gt;500 → {@link MotorTypes#SERVO_R},
-     *       values ≤500 → {@link MotorTypes#SERVO_L}.</li>
+     *
      *   <li>Build and return the final string in the format:
      *       "&lt;v1&gt;|&lt;v2&gt;|…| &lt;servo_id&gt;".</li>
      * </ol>
@@ -115,27 +114,25 @@ public class SignalReceiver {
         // Split into individual sample strings
         String[] tokens = valuesOnly.split("\\|");
         String last = tokens[tokens.length - 1];
-        int lastVal;
 
-        try {
-            lastVal = Integer.parseInt(last);
-        } catch (NumberFormatException e) {
-            // Last token wasn’t a valid int
-            return valuesOnly + " | NO_MOTORS";
-        }
-
-        // Threshold-based servo decision
-        MotorTypes target = (lastVal > 500)
-                ? MotorTypes.SERVO_R
-                : MotorTypes.SERVO_L;
 
         // Final output: "<v1>|<v2>|...| <servo_id>"
-        return valuesOnly + " | " + target.getId();
-
-
+        return valuesOnly + " | " + updateMotorOfID();
 
     }
 
+    /**
+     * Internal: Checks For The Required Motor And Then Returns The ID Of The Motor.
+     * For Fallback, It Returns {@code null} As A String Type.
+     * */
+    private String updateMotorOfID(){
+
+
+
+
+
+        return "null";
+    }
 
     /**
      * Internal: accumulate bytes into leftover buffer, split on {@code '\n'},
