@@ -71,13 +71,17 @@ public class SignalReceiver {
 
         rawMessage = rawMessage.trim();
         if (!rawMessage.contains(DELIMITER)) {
-            LOGGER.log(Level.WARNING, "Malformed message missing delimiter: \"{0}\"", rawMessage);
+            LOGGER.log(Level.WARNING,
+                    "Malformed message missing delimiter: \"{0}\"",
+                    rawMessage);
             return "";
         }
 
         String[] parts = rawMessage.split(DELIMITER, 2);
         if (parts.length != 2) {
-            LOGGER.log(Level.WARNING, "Unexpected number of segments after split: {0}", Arrays.toString(parts));
+            LOGGER.log(Level.WARNING,
+                    "Unexpected number of segments after split: {0}",
+                    Arrays.toString(parts));
             return "";
         }
 
@@ -89,36 +93,43 @@ public class SignalReceiver {
         try {
             value = Integer.parseInt(valueStr);
         } catch (NumberFormatException nfe) {
-            LOGGER.log(Level.WARNING, "Invalid numeric component: \"{0}\"", valueStr);
+            LOGGER.log(Level.WARNING,
+                    "Invalid numeric component: \"{0}\"",
+                    valueStr);
             return "";
         }
 
         // Step 3: Resolve MEG cortical region by protocol ID
         ElectrodeSystem region = findRegionByProtocol(protocolId);
         if (region == null) {
-            LOGGER.log(Level.WARNING, "Unknown protocol identifier: \"{0}\"", protocolId);
+            LOGGER.log(Level.WARNING,
+                    "Unknown protocol identifier: \"{0}\"",
+                    protocolId);
             return "";
         }
 
         // Step 4: Lookup motors linked to this region
-        List<MotorTypes> motors = regionToMotors.getOrDefault(region, Collections.emptyList());
+        List<MotorTypes> motors =
+                regionToMotors.getOrDefault(region, Collections.emptyList());
         if (motors.isEmpty()) {
             LOGGER.log(Level.INFO, "No motors mapped to region: {0}", region);
             return "";
         }
 
         // Step 5: Convert value to digit CSV and assemble command lines
-        String[] digits  = String.valueOf(value).split("");
-        String   csv     = String.join(",", digits);
-        List<String> outputLines = new ArrayList<>();
+        String[] digits = String.valueOf(value).split("");
+        String csv = String.join(",", digits);
 
+        List<String> outputLines = new ArrayList<>();
         for (MotorTypes motor : motors) {
             if (motor == null || motor.getId() == null) {
-                LOGGER.log(Level.WARNING, "Invalid motor entry in mapping for region {0}", region);
+                LOGGER.log(Level.WARNING,
+                        "Invalid motor entry in mapping for region {0}",
+                        region);
                 continue;
             }
             // Format: 5,1,2|s_j_1
-            outputLines.add(STR."\{csv}|\{motor.getId()}");
+            outputLines.add(csv + "|" + motor.getId());
         }
 
         return String.join("\n", outputLines);

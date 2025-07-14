@@ -58,9 +58,8 @@ public class BluetoothMotorTransmitter {
                 continue;
             }
             try {
-                byte[] data = (STR."""
-\{line}
-""")
+                // Append newline and convert to UTF-8 bytes
+                byte[] data = (line + "\n")
                         .getBytes(StandardCharsets.UTF_8);
                 out.write(data);
                 out.flush();
