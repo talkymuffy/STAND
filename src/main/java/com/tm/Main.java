@@ -1,6 +1,7 @@
 package com.tm;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.tm.signal_interpretation.BluetoothMotorTransmitter;
 import com.tm.signal_interpretation.SignalEngine;
 
 import java.io.IOException;
@@ -141,22 +142,20 @@ public class Main {
      *
      * @return the running engine thread
      */
+    /**
+     * Launches {@link SignalEngine} in its own thread, using the transmitter
+     * to send motor command strings over Bluetooth.
+     *
+     * @param in  the MEG signal InputStream
+     * @param out the Bluetooth OutputStream
+     * @return the thread running SignalEngine
+     */
     private static Thread startSignalEngine(InputStream in, OutputStream out) {
-        Consumer<String> bluetoothSender = formatted -> {
-            for (String line : formatted.split("\\R")) {
-                try {
-                    byte[] data = (STR."""
-\{line}\r
-""")
-                            .getBytes(StandardCharsets.UTF_8);
-                    out.write(data);
-                    out.flush();
-                    LOGGER.fine(STR."Sent command: \{line}");
-                } catch (IOException e) {
-                    LOGGER.log(Level.WARNING, STR."Failed to send command: \{line}", e);
-                }
-            }
-        };
+        // Instantiate Bluetooth transmitter module
+        BluetoothMotorTransmitter transmitter = new BluetoothMotorTransmitter(out);
+
+        // Pass transmitter::transmit as the output handler to SignalEngine
+        Consumer<String> bluetoothSender = transmitter::transmit;
 
         SignalEngine engine = new SignalEngine(in, bluetoothSender);
         Thread thread = new Thread(engine, "SignalEngine-Thread");
